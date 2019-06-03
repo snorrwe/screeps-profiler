@@ -1,29 +1,21 @@
 use crate::*;
 use screeps::raw_memory;
 use std::collections::HashMap;
-
-static mut TABLE: *mut ProfileTable = std::ptr::null_mut();
-static mut IDS: *mut HashMap<&'static str, ProfileId> = std::ptr::null_mut();
+use std::sync::Mutex;
 
 lazy_static! {
-    static ref CACHE: (ProfileTable, HashMap<&'static str, ProfileId>) = {
-        unsafe {
-            let mut table = ProfileTable::new();
-            let mut ids = HashMap::new();
-            TABLE = &mut table as *mut _;
-            IDS = &mut ids as *mut _;
-            (table, ids)
-        }
-    };
+    static ref TABLE: Mutex<ProfileTable> = Mutex::new(ProfileTable::new());
+    static ref IDS: Mutex<HashMap<&'static str, ProfileId>> = Mutex::new(HashMap::new());
 }
 
 pub unsafe fn create_sentinel(name: &'static str) -> ProfileSentinel<fn() -> f64> {
-    CACHE; // Init
-    let id = (*IDS)
+    let mut table = TABLE.lock().unwrap();
+    let mut ids = IDS.lock().unwrap();
+    let id = ids
         .entry(name)
-        .or_insert_with(|| (*TABLE).add_entity(name.to_owned()));
+        .or_insert_with(|| table.add_entity(name.to_owned()));
 
-    new_sentinel(*id, &mut *TABLE)
+    new_sentinel(*id, &mut table)
 }
 
 pub fn new_sentinel(id: ProfileId, table: &mut ProfileTable) -> ProfileSentinel<fn() -> f64> {
@@ -43,20 +35,35 @@ pub struct RawMemoryProfiler {
 impl RawMemoryProfiler {
     pub fn read_from_segment_or_default(memory_segment: u8) -> Self {
         raw_memory::get_segment(memory_segment as u32)
-            .and_then(|string| serde_json::from_str(&string).ok())
-            .unwrap_or_else(|| {
+            .and_then(|string| {
+                serde_json::from_str(&string)
+                    .ok()
+                    .map(|data: Vec<ProfileTable>| Self {
+                        data,
+                        memory_segment: memory_segment,
+                    })
+            })
+            .or_else(|| {
                 let mut result = Self::default();
                 result.memory_segment = memory_segment;
-                result
+                Some(result)
             })
+            .unwrap()
     }
 }
 
 impl Drop for RawMemoryProfiler {
     fn drop(&mut self) {
-        let table = CACHE.0.clone();
+        let table = TABLE.lock().unwrap().clone();
         self.data.push(table);
-        let data = serde_json::to_string(self).expect("Failed to serialize RawMemoryProfiler");
+        let data =
+            serde_json::to_string(&self.data).expect("Failed to serialize RawMemoryProfiler");
+
+        TABLE.lock().unwrap().clear();
+        IDS.lock().unwrap().clear();
+
+        debug!("Saving RawMemoryProfiler {:?}", data);
+
         raw_memory::set_segment(self.memory_segment as u32, data.as_str());
     }
 }

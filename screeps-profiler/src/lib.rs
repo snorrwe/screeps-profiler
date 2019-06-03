@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate serde;
+#[macro_use]
+extern crate log;
 #[cfg(feature = "screeps")]
 #[macro_use]
 extern crate lazy_static;
@@ -20,6 +22,11 @@ pub struct ProfileTable {
 impl ProfileTable {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn clear(&mut self) {
+        self.labels.clear();
+        self.data.clear();
     }
 
     pub fn add_entity(&mut self, name: String) -> ProfileId {
