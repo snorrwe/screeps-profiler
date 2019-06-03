@@ -3,6 +3,16 @@ use screeps::raw_memory;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
+#[macro_export]
+macro_rules! profile {
+    ($name: expr) => {
+        let _sentinel = unsafe {
+            let name = concat!(module_path!(), "::", $name);
+            create_sentinel(&name)
+        };
+    };
+}
+
 lazy_static! {
     static ref TABLE: Mutex<ProfileTable> = Mutex::new(ProfileTable::new());
     static ref IDS: Mutex<HashMap<&'static str, ProfileId>> = Mutex::new(HashMap::new());
