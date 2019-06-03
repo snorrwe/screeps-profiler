@@ -6,6 +6,44 @@ extern crate lazy_static;
 #[cfg(feature = "screeps")]
 extern crate screeps;
 
+#[cfg(feature = "screeps")]
+pub mod screeps_profiling {
+    use super::*;
+    use std::collections::HashMap;
+
+    static mut TABLE: *mut ProfileTable = std::ptr::null_mut();
+    static mut IDS: *mut HashMap<&'static str, ProfileId> = std::ptr::null_mut();
+
+    lazy_static! {
+        static ref CACHE: (ProfileTable, HashMap<&'static str, ProfileId>) = {
+            unsafe {
+                let mut table = ProfileTable::new();
+                let mut ids = HashMap::new();
+                TABLE = &mut table as *mut _;
+                IDS = &mut ids as *mut _;
+                (table, ids)
+            }
+        };
+    }
+
+    pub unsafe fn create_sentinel(name: &'static str) -> ProfileSentinel<fn() -> f64> {
+        &CACHE; // Init
+        let id = (*IDS)
+            .entry(name)
+            .or_insert_with(|| (*TABLE).add_entity(name.to_owned()));
+
+        new_sentinel(*id, &mut *TABLE)
+    }
+
+    pub fn new_sentinel(id: ProfileId, table: &mut ProfileTable) -> ProfileSentinel<fn() -> f64> {
+        ProfileSentinel::new(id, table, screeps::game::cpu::get_used)
+    }
+
+    // TODO:
+    //
+    // Object to save the table into RawMemory
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ProfileTable {
     labels: Vec<String>,
@@ -104,6 +142,7 @@ mod tests {
 
         let call_one = table.add_entity("One".to_owned());
         let call_two = table.add_entity("Two".to_owned());
+        let call_zero = table.add_entity("Zero".to_owned());
 
         let mut cpu = 1.;
         let get_cpu = move || {
@@ -120,6 +159,8 @@ mod tests {
             let _sentinel = ProfileSentinel::new(call_two, &mut table, get_cpu);
         }
 
+        println!("{:#?}", table);
+
         assert_eq!(
             table.get_data(call_one).map(|x| x.cpu_per_call.len()),
             Some(1)
@@ -129,7 +170,10 @@ mod tests {
             Some(2)
         );
 
-        println!("{:#?}", table);
+        assert_eq!(
+            table.get_data(call_zero).map(|x| x.cpu_per_call.len()),
+            Some(0)
+        );
 
         let cpu = table.get_data(call_one).map(|x| x.cpu_per_call[0]).unwrap();
         assert!((2.0 - cpu).abs() < 0.0003);
