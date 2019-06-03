@@ -73,7 +73,8 @@ impl Drop for RawMemoryProfiler {
         TABLE.lock().unwrap().clear();
         IDS.lock().unwrap().clear();
 
-        if std::mem::size_of_val(&data) < 99_000 {
+        // The limit of RawMemory is 10KB, also assuming 8 bit bytes
+        if data.len() < 10_000 / 8 {
             raw_memory::set_segment(self.memory_segment as u32, data.as_str());
         }
     }
