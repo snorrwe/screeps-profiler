@@ -9,6 +9,12 @@ include = [
     "LICENCE",
     "README.md",
 ]
+readme = "README.md"
+license = "MIT"
+description = "Profiling helper libarary for Screeps"
+homepage = "https://github.com/snorrwe/screeps-profiler"
+repository = "https://github.com/snorrwe/screeps-profiler"
+keyword = ["screeps", "profiling", "profiler"]
 
 [lib]
 name = "screeps_profiler"
