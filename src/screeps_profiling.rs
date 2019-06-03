@@ -73,8 +73,6 @@ impl Drop for RawMemoryProfiler {
         TABLE.lock().unwrap().clear();
         IDS.lock().unwrap().clear();
 
-        debug!("Saving RawMemoryProfiler {:?}", data);
-
         raw_memory::set_segment(self.memory_segment as u32, data.as_str());
     }
 }
