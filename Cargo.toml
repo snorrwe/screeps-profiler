@@ -14,14 +14,13 @@ license = "MIT"
 description = "Profiling helper libarary for Screeps"
 homepage = "https://github.com/snorrwe/screeps-profiler"
 repository = "https://github.com/snorrwe/screeps-profiler"
-keyword = ["screeps", "profiling", "profiler"]
+keywords = ["screeps", "profiling", "profiler"]
 
 [lib]
 name = "screeps_profiler"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
-log = "*"
 
 lazy_static = { version = "1.3", optional = true }
 screeps-game-api = { version = "0.4", optional = true }

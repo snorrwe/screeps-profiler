@@ -1,7 +1,5 @@
 #[macro_use]
 extern crate serde;
-#[macro_use]
-extern crate log;
 #[cfg(feature = "screeps")]
 #[macro_use]
 extern crate lazy_static;
