@@ -18,7 +18,7 @@ lazy_static! {
 }
 
 pub unsafe fn create_sentinel(name: &'static str) -> ProfileSentinel<fn() -> f64> {
-    &CACHE; // Init
+    CACHE; // Init
     let id = (*IDS)
         .entry(name)
         .or_insert_with(|| (*TABLE).add_entity(name.to_owned()));
