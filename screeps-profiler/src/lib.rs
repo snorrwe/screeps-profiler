@@ -18,13 +18,6 @@ impl ProfileTable {
     }
 
     pub fn add_entity(&mut self, name: String) -> ProfileId {
-        #[cfg(debug)]
-        {
-            if self.labels.iter().find(|n| **n == name).is_none() {
-                println!("Warning! The same name was registered twice!");
-            }
-        }
-
         let id = self.data.len();
         self.labels.push(name);
         self.data.push(ProfileRow::default());
@@ -73,7 +66,6 @@ where
 {
     pub fn new(id: ProfileId, table: &mut ProfileTable, mut get_cpu: T) -> Self {
         let cpu = get_cpu();
-
 
         Self {
             cpu_at_start: cpu,
