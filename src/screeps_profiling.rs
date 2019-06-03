@@ -73,7 +73,9 @@ impl Drop for RawMemoryProfiler {
         TABLE.lock().unwrap().clear();
         IDS.lock().unwrap().clear();
 
-        raw_memory::set_segment(self.memory_segment as u32, data.as_str());
+        if std::mem::size_of_val(&data) < 99_000 {
+            raw_memory::set_segment(self.memory_segment as u32, data.as_str());
+        }
     }
 }
 
