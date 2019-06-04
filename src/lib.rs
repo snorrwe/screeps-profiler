@@ -4,8 +4,6 @@
 extern crate serde;
 #[macro_use]
 extern crate lazy_static;
-#[macro_use]
-extern crate log;
 extern crate screeps;
 extern crate serde_json;
 

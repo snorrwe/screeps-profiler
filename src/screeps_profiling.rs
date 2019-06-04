@@ -56,7 +56,6 @@ impl RawMemoryProfiler {
 
     #[cfg(feature = "enabled")]
     pub fn read_from_segment_or_default(memory_segment: u8) -> Self {
-        warn!("2222");
         raw_memory::get_segment(memory_segment as u32)
             .and_then(|string| {
                 serde_json::from_str(&string)
