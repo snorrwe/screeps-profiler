@@ -2,18 +2,13 @@
 //!
 #[macro_use]
 extern crate serde;
-#[cfg(feature = "screeps")]
 #[macro_use]
 extern crate lazy_static;
-#[cfg(feature = "screeps")]
 extern crate screeps;
-#[cfg(feature = "screeps")]
 extern crate serde_json;
 
-#[cfg(feature = "screeps")]
 pub mod screeps_profiling;
 
-#[cfg(feature = "screeps")]
 pub use screeps_profiling::*;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

@@ -6,7 +6,6 @@ use std::sync::Mutex;
 #[macro_export]
 macro_rules! profile {
     ($name: expr) => {
-        #[cfg(feature= "enabled")]
         let _sentinel = unsafe {
             use screeps_profiler::screeps_profiling::create_sentinel;
             let name = concat!(module_path!(), "::", $name);
@@ -20,6 +19,7 @@ lazy_static! {
     static ref IDS: Mutex<HashMap<&'static str, ProfileId>> = Mutex::new(HashMap::new());
 }
 
+#[cfg(feature = "enabled")]
 pub unsafe fn create_sentinel(name: &'static str) -> ProfileSentinel<fn() -> f64> {
     let mut table = TABLE.lock().unwrap();
     let mut ids = IDS.lock().unwrap();
@@ -29,6 +29,9 @@ pub unsafe fn create_sentinel(name: &'static str) -> ProfileSentinel<fn() -> f64
 
     new_sentinel(*id, &mut table)
 }
+
+#[cfg(not(feature = "enabled"))]
+pub unsafe fn create_sentinel(_name: &'static str) {}
 
 pub fn new_sentinel(id: ProfileId, table: &mut ProfileTable) -> ProfileSentinel<fn() -> f64> {
     ProfileSentinel::new(id, table, screeps::game::cpu::get_used)
@@ -45,6 +48,12 @@ pub struct RawMemoryProfiler {
 }
 
 impl RawMemoryProfiler {
+    #[cfg(not(feature = "enabled"))]
+    pub fn read_from_segment_or_default(memory_segment: u8) -> Self {
+        Self::default()
+    }
+
+    #[cfg(feature = "enabled")]
     pub fn read_from_segment_or_default(memory_segment: u8) -> Self {
         raw_memory::get_segment(memory_segment as u32)
             .and_then(|string| {
@@ -64,6 +73,7 @@ impl RawMemoryProfiler {
     }
 }
 
+#[cfg(feature = "enabled")]
 impl Drop for RawMemoryProfiler {
     fn drop(&mut self) {
         let table = TABLE.lock().unwrap().clone();
