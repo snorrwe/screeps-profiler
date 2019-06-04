@@ -56,6 +56,7 @@ impl RawMemoryProfiler {
 
     #[cfg(feature = "enabled")]
     pub fn read_from_segment_or_default(memory_segment: u8) -> Self {
+        warn!("2222");
         raw_memory::get_segment(memory_segment as u32)
             .and_then(|string| {
                 serde_json::from_str(&string)
@@ -74,20 +75,22 @@ impl RawMemoryProfiler {
     }
 }
 
-#[cfg(feature = "enabled")]
 impl Drop for RawMemoryProfiler {
     fn drop(&mut self) {
-        let table = TABLE.lock().unwrap().clone();
-        self.data.push(table);
-        let data =
-            serde_json::to_string(&self.data).expect("Failed to serialize RawMemoryProfiler");
+        #[cfg(feature = "enabled")]
+        {
+            let table = TABLE.lock().unwrap().clone();
+            self.data.push(table);
+            let data =
+                serde_json::to_string(&self.data).expect("Failed to serialize RawMemoryProfiler");
 
-        TABLE.lock().unwrap().clear();
-        IDS.lock().unwrap().clear();
+            TABLE.lock().unwrap().clear();
+            IDS.lock().unwrap().clear();
 
-        // The limit of RawMemory is 10KB, also assuming 8 bit bytes
-        if data.len() < 10_000 / 8 {
-            raw_memory::set_segment(self.memory_segment as u32, data.as_str());
+            // The limit of RawMemory is 10KB, also assuming 8 bit bytes
+            if data.len() < 10_000 / 8 {
+                raw_memory::set_segment(self.memory_segment as u32, data.as_str());
+            }
         }
     }
 }

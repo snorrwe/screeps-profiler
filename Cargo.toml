@@ -1,6 +1,6 @@
 [package]
 name = "screeps-profiler"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Daniel Kiss <littlesnorrboy@gmail.com>"]
 edition = "2018"
 include = [
@@ -24,7 +24,7 @@ serde = { version = "1.0", features = ["derive"] }
 lazy_static = "1.3"
 screeps-game-api = "0.4"
 serde_json = "1.0"
+log = "0.4"
 
 [features]
-default = []
 enabled = []
