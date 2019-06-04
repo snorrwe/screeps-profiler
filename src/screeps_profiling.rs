@@ -1,4 +1,5 @@
 use crate::*;
+#[cfg(feature = "enabled")]
 use screeps::raw_memory;
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -19,6 +20,9 @@ lazy_static! {
     static ref IDS: Mutex<HashMap<&'static str, ProfileId>> = Mutex::new(HashMap::new());
 }
 
+#[cfg(not(feature = "enabled"))]
+pub unsafe fn create_sentinel(_name: &'static str) {}
+
 #[cfg(feature = "enabled")]
 pub unsafe fn create_sentinel(name: &'static str) -> ProfileSentinel<fn() -> f64> {
     let mut table = TABLE.lock().unwrap();
@@ -29,9 +33,6 @@ pub unsafe fn create_sentinel(name: &'static str) -> ProfileSentinel<fn() -> f64
 
     new_sentinel(*id, &mut table)
 }
-
-#[cfg(not(feature = "enabled"))]
-pub unsafe fn create_sentinel(_name: &'static str) {}
 
 pub fn new_sentinel(id: ProfileId, table: &mut ProfileTable) -> ProfileSentinel<fn() -> f64> {
     ProfileSentinel::new(id, table, screeps::game::cpu::get_used)
@@ -49,7 +50,7 @@ pub struct RawMemoryProfiler {
 
 impl RawMemoryProfiler {
     #[cfg(not(feature = "enabled"))]
-    pub fn read_from_segment_or_default(memory_segment: u8) -> Self {
+    pub fn read_from_segment_or_default(_memory_segment: u8) -> Self {
         Self::default()
     }
 

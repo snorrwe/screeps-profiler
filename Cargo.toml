@@ -11,7 +11,7 @@ include = [
 ]
 readme = "README.md"
 license = "MIT"
-description = "Profiling helper libarary for Screeps"
+description = "WASM profiling helper libarary for Screeps"
 homepage = "https://github.com/snorrwe/screeps-profiler"
 repository = "https://github.com/snorrwe/screeps-profiler"
 keywords = ["screeps", "profiling", "profiler"]
@@ -26,5 +26,5 @@ screeps-game-api = "0.4"
 serde_json = "1.0"
 
 [features]
-default = ["enabled"]
+default = []
 enabled = []
