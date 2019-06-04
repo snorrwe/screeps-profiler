@@ -1,3 +1,5 @@
+//!
+//!
 #[macro_use]
 extern crate serde;
 #[cfg(feature = "screeps")]
@@ -10,6 +12,9 @@ extern crate serde_json;
 
 #[cfg(feature = "screeps")]
 pub mod screeps_profiling;
+
+#[cfg(feature = "screeps")]
+pub use screeps_profiling::*;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ProfileTable {

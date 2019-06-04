@@ -6,6 +6,7 @@ use std::sync::Mutex;
 #[macro_export]
 macro_rules! profile {
     ($name: expr) => {
+        #[cfg(feature= "enabled")]
         let _sentinel = unsafe {
             use screeps_profiler::screeps_profiling::create_sentinel;
             let name = concat!(module_path!(), "::", $name);
